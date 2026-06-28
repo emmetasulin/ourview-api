@@ -69,7 +69,8 @@ Your job:
 
     const completion = await openai.chat.completions.create({
       model: MODEL,
-      max_tokens: 200,
+      max_tokens: 400,
+      reasoning_effort: 'none', // turn off Gemini "thinking" so short replies aren't truncated
       messages: [{ role: 'system', content: systemPrompt }, ...history, { role: 'user', content: message }],
     });
 
