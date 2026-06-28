@@ -1,0 +1,14 @@
+{
+  "name": "ourview-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ourview.io backend — Vercel serverless functions (chat, onboarding, dashboard, webhooks).",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "openai": "^4.56.0"
+  }
+}
