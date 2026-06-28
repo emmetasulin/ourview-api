@@ -46,6 +46,12 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, businessId: data.id });
   } catch (err) {
     console.error('onboarding error:', err);
-    return res.status(500).json({ error: 'Could not save onboarding' });
+    // TEMP: surface the real reason so we can debug, then revert to a generic message.
+    return res.status(500).json({
+      error: err.message || String(err),
+      code: err.code || null,
+      details: err.details || null,
+      hint: err.hint || null,
+    });
   }
 }
