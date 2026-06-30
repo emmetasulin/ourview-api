@@ -19,6 +19,14 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, note: 'Supabase not connected yet — not persisted.' });
   }
 
+  // If the request is signed in, we'll make that user the business owner.
+  let ownerUserId = null;
+  const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+  if (token) {
+    const { data: u } = await supabase.auth.getUser(token);
+    ownerUserId = u?.user?.id || null;
+  }
+
   const row = {
     name: p.name,
     owner_name: p.owner || null,
@@ -42,8 +50,20 @@ export default async function handler(req, res) {
   try {
     const { data, error } = await supabase.from('businesses').insert(row).select('id').single();
     if (error) throw error;
-    // The widget snippet for this business uses this id as OURVIEW_BUSINESS_ID.
-    return res.status(200).json({ ok: true, businessId: data.id });
+    const businessId = data.id;
+
+    // Make the signed-in creator the OWNER, so they can log into this dashboard.
+    if (ownerUserId) {
+      await supabase.from('business_members').insert({
+        business_id: businessId,
+        user_id: ownerUserId,
+        email: String(p.email).toLowerCase().trim(),
+        role: 'owner',
+        status: 'active',
+        joined_at: new Date().toISOString(),
+      });
+    }
+    return res.status(200).json({ ok: true, businessId });
   } catch (err) {
     console.error('onboarding error:', err);
     return res.status(500).json({ error: 'Could not save onboarding' });
